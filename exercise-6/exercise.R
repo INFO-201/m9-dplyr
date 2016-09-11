@@ -1,4 +1,4 @@
-# Exercise 5: DPLYR Grouped Operations
+# Exercise 6: DPLYR join introduction
 
 # Install the nycflights13 package and read it in. Require the dplyr package.
 # install.packages("nycflights13")
