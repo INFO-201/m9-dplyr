@@ -3,8 +3,29 @@
 ## Overview
 The DPLYR package is the preeminent tool for data wrangling in R (and perhaps, in data science more generally). It provides users with an intuitive vocabulary for executing data management and analysis tasks. Learning this package will undoubtedly make your data preparation and management process faster and easier to understand.
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Contents**
+
+- [Resources](#resources)
+- [A Grammar of Data Manipulation](#a-grammar-of-data-manipulation)
+- [Data Frame Manipulation](#data-frame-manipulation)
+  - [Select](#select)
+  - [Filter](#filter)
+  - [Mutate](#mutate)
+  - [Arrange](#arrange)
+  - [Summarise](#summarise)
+  - [Distinct](#distinct)
+- [Pipe Operator](#pipe-operator)
+  - [Nested Operations](#nested-operations)
+  - [Pipe Operator Syntax](#pipe-operator-syntax)
+- [Grouped Operations](#grouped-operations)
+- [Joins](#joins)
+  - [DPLYR Joins,](#dplyr-joins)
+- [Non-standard Evaluation](#non-standard-evaluation)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Resources
 - [Introduction to DPLYR - RStudio](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html)
@@ -28,10 +49,13 @@ The DPLYR package is the preeminent tool for data wrangling in R (and perhaps, i
 
 As you know, it's possible to implement any of these procedures with base R code -- this library just makes it easier to read and write. In the next section, we'll learn how to implement these functions to ask questions of our datasets.
 
+To practice asking questions about datasets _without_ `dplyr`, see [exercise-1](exercise-1).
+
 ## Data Frame Manipulation
 Many real-world questions about a dataset boil down to isolating specific rows/columns of the data and performing a simple comparison or computation (mean, median, etc.). Making yourself comfortable with the following operations will allow you to quickly write code to ask questions of your dataset.
 
 For each of the following `dplyr` functions, the first argument to the function is a data frame, followed by various other arguments. Note, inside of the `dplyr` function parenthases, you should reference data frame columns **without quotation marks** (see examples below). This design choice makes the code easier to write and read, though occasionally can create challenges. To learn more, see the section below on [Non-standard Evaluation](#Non-standard Evaluation).
+
 
 The images in this section come from the [RStudio STRATA NYC Materials](bit.ly/rday-nyc-strata15), which was presented by [Nathan Stephens](http://conferences.oreilly.com/strata/big-data-conference-ny-2015/public/schedule/speaker/217840).
 
@@ -109,7 +133,7 @@ To sort by the **reverse** order of a column, simply place a minus sign (`-`) pr
 ### Summarise
 The `summarise` function (`summarize` is also accepted) creates a summary of a **column**, computing a single value from multipe values. The `summarise` function is particularly useful for grouped operations (see below), however can be used in non-grouped operations as well, for example:
 
-![screenshot of the arrange function](imgs/arrange-ss.png)
+![screenshot of the summarise function](imgs/summarise-ss.png)
 
 ```r
 # Compute the median value of the `amount` column
@@ -135,7 +159,7 @@ The `distinct` function allows you to extract only the distinct **rows** in a ta
 # Create a quick data frame
 x <- c(1, 1, 2, 2, 3, 3, 4, 4)
 y <- 1:8
-my.df <- as.data.frame(cbind(x, y))
+my.df <- data.frame(x, y)
 
 # Select distinct rows, judging by the `x` column
 distinct.rows <- distinct(my.df, x)
@@ -145,6 +169,8 @@ distinct.rows <- distinct(my.df, x, y)
 ```
 
 While this is a simple way to get a unique set of rows, **be careful** not to unintentionally remove rows of your data which may be important.
+
+To practice asking questions about datasets _with_ `dplyr`, see [exercise-2](exercise-2).
 
 ## Pipe Operator
 You've likely encountered a number of instances in which you want to take the results from one function and pass them into another function. Our approach thus far has often been to create temporary variables for use in our analysis. For example, if you're using the `mtcars` dataset, you may want to ask a simple question like,
@@ -199,10 +225,10 @@ best.car.name <- select(
                 )
 ```
 
-The above statement executes without creating undersired temporary variabls, but even with only 3 steps it gets quite complicated to read (think about it from the inside out for clarity). This will obviously become undecipherable for more involved operatins. Luckily, the pipe operator will provide us with a more clean (and cleaver) way of achieving the above task.
+The above statement executes without creating undesirable temporary variables, but even with only 3 steps it gets quite complicated to read (think about it from the inside out for clarity). This will obviously become undecipherable for more involved operations. Luckily, the pipe operator will provide us with a more clean (and cleaver) way of achieving the above task.
 
 ### Pipe Operator Syntax
-The pipe operator provides us with a syntax for taking the _results from one function_ and passing them in as the _first argument to a second function_. This avoids creating unneeded variables without the desnsity of a nested statement. Unfortunately, the pipe operator syntax (`%>%`) takes getting used to. To save time, use the [RStudio keyboard shortcut](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts) (`cmd + shift + m`)
+The pipe operator provides us with a syntax for taking the _results from one function_ and passing them in as the _first argument to a second function_. This avoids creating unneeded variables without the density of a nested statement. Unfortunately, the pipe operator syntax (`%>%`) takes getting used to. To save time, use the [RStudio keyboard shortcut](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts) (`cmd + shift + m`)
 
 ```r
 # Add a column that is the car name
@@ -233,7 +259,6 @@ This quickly and easily allows you to compare different subsets of your data, as
 ![screenshot of the groupby function](imgs/groupby-ss.png)
 
 ```r
-# Select storms whose `storm` column is in the vector ['Ana', 'Alberto']
 # Group the pollution data.frame by city for comparison
 pollution <- group_by(pollution, city) %>%
                summarise(mean = mean(amount), sum = sum(amount), n = n()
@@ -299,3 +324,26 @@ As described in the [documentation](https://cran.r-project.org/web/packages/dply
 > `full_join`: All observations in both datasets are returned
 
 > `right_join`: Opposite of a `left_join`: only observations in the _second_ data frame are returned
+
+## Non-standard Evaluation
+One of the features that makes `dplyr` such a clean and attractive way to write code is it's use of **non-standard evaluation**. Inside of each `dplyr` function, we've been using variable names **without quotes** because the package leverages **non-standard evaluation** in it's definition. _Most_ of the time, this is not an issue. However, you'll likely run into a situation in which you want to (or need to) use quoted values inside of your `dplyr` functions.
+
+The syntax for doing this is quite easy: simply add an underscore (`_`) after your `dplyr` function, and then quote your argument values:
+
+```r
+# Use non-standard evaluation to execute function:
+mpg <- select_(mtcars, 'mpg')
+
+# Pass in a quoted equation
+mean.mpg <- summarise_(mtcars, 'mean(mpg)')
+```
+
+A fairly common use-case for this is if you're storing the _name_ of a variable of interest in a variable:
+
+```r
+# Which variable you're interested in
+var.of.interest <- 'mpg'
+
+# Use non-standard evaluation to execute function:
+mpg <- select_(mtcars, var.of.interest)
+```
