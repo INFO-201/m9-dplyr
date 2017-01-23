@@ -1,6 +1,10 @@
 # Exercise 2: Data Frame Practice with `dplyr`.
 # Use a different appraoch to accomplish the same tasks as exercise-1
 
+# install and load dplyr
+install.packages("dplyr")
+library("dplyr")
+
 # Exercise 1: Data Frame Practice
 
 # Install devtools package: allows installations from GitHub
@@ -30,11 +34,11 @@ worst.hwy <- select(filtered, id)
 
 # In one line with a pipe:
 
-# Write a function that takes a `year` and a `make` as parameters, and returns 
+# Write a function that takes a `year` and a `make` as parameters, and returns
 # The vehicle that gets the most hwy miles/gallon of vehicles of that make in that year
 MakeYearFilter <- function(my_make, my_year) {
-  filtered <- filter(vehicles, make == my_make, year == my_year) %>% 
-              filter(hwy == max(hwy))
+  filtered <- filter(vehicles, make == my_make, year == my_year)
+  filtered <- filter(filtered, hwk == max(hwy))
   return(filtered)
 }
 
