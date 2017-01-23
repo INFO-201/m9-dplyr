@@ -293,6 +293,7 @@ The **`group_by()`** operation allows you to break a data frame down into _group
 ![Diagram of the group_by function](img/group_by.png)
 
 ```r
+# Get summary statistics by city
 city.summary <- group_by(pollution, city) %>%
   summarize( # first parameter (the data frame) is recieved from the pipe
     mean = mean(amount),
@@ -331,6 +332,7 @@ The **`left_join()`** operation is one example of a join. This operation looks f
 ![Diagram of the left_join function](img/left_join.png)
 
 ```r
+# Combine (join) songs and artists data frames
 left_join(songs, artists)
 ```
 
