@@ -8,20 +8,17 @@ The **`dplyr`** ("dee-ply-er") package is the preeminent tool for data wrangling
 
 - [Resources](#resources)
 - [A Grammar of Data Manipulation](#a-grammar-of-data-manipulation)
-- [Data Frame Manipulation](#data-frame-manipulation)
+- [Using `dplyr` Functions](#using-dplyr-functions)
   - [Select](#select)
   - [Filter](#filter)
   - [Mutate](#mutate)
   - [Arrange](#arrange)
-  - [Summarise](#summarise)
-  - [Distinct](#distinct)
-- [Pipe Operator](#pipe-operator)
-  - [Nested Operations](#nested-operations)
-  - [Pipe Operator Syntax](#pipe-operator-syntax)
+  - [Summarize](#summarize)
+- [Multiple Operations](#multiple-operations)
+  - [The Pipe Operator](#the-pipe-operator)
 - [Grouped Operations](#grouped-operations)
 - [Joins](#joins)
-  - [DPLYR Joins,](#dplyr-joins)
-- [Non-standard Evaluation](#non-standard-evaluation)
+- [Non-Standard Evaluation vs. Standard Evaluation](#non-standard-evaluation-vs-standard-evaluation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
