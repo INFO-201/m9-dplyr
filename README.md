@@ -274,8 +274,8 @@ Or as another version of the above data wrangling:
 mtcars.named <- mutate(mtcars, car.name = row.names(mtcars))
 
 best.car.name <- filter(mtcars.named, cyl == 4) %>%  # Step 1
-  filter(four.cyl, mpg == max(mpg)) %>%  # Step 2
-  select(best.four.cyl, car.name)
+  filter(mpg == max(mpg)) %>%  # Step 2
+  select(car.name)
 ```
 
 - Yes, the `%>%` operator is awkward to type and takes some getting use to (especially compared to the command-line's use of `|` to pipe). However, you can ease typing either by noticing that you hold down the `shift` key for all 3 characters, or by using the [RStudio keyboard shortcut](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts) `cmd + shift + m`.
