@@ -121,7 +121,7 @@ storms <- mutate(storms, ratio = pressure/wind)  # Replace existing frame with m
 The `mutate()` function takes in the data frame to mutate, followed by a comma-separated list of columns to create using the same **`name = vector`** syntax we used when creating **lists** or **data frames** from scratch. As always, the names of the columns in the data frame are used without quotation marks.
 - Despite the `mutate()` function doesn't actually change the data frame; instead it returns a _new_ data frame that has the extra columns added. You will often want to replace the old data frame variable with this new value.
 
-In cases where you are creating multiple columns (and therefore writing really long lines of code), you should break the single statement into multiple lines for readability. Because you haven't closed the parentheses on the function parameters, R will not treat each line as a separate statement.
+In cases where you are creating multiple columns (and therefore writing really long lines of code), you should break the single statement into multiple lines for readability. Because you haven't closed the parentheses on the function arguments, R will not treat each line as a separate statement.
 
 ```r
 # Generic mutate command
@@ -238,12 +238,12 @@ mtcars.named <- mutate(mtcars, car.name = row.names(mtcars))
 best.car.name <- select(  # 3. Select car name of the car
                   filter(  # 2. Filter down to the one with the highest mpg
                     filter( # 1. Filter down to only four cylinder cars
-                      mtcars.named,  # parameters for the Step 1 filter
+                      mtcars.named,  # arguments for the Step 1 filter
                       cyl == 4
                     ),
-                    mpg == max(mpg)  # other parameters for the Step 2 filter
+                    mpg == max(mpg)  # other arguments for the Step 2 filter
                   ),
-                  car.name  # other parameters for the Step 3 select
+                  car.name  # other arguments for the Step 3 select
                 )
 ```
 
@@ -254,7 +254,7 @@ This _nested_ version performs the same results as the _temporary variable_ vers
 This will obviously become undecipherable for more involved operations. Luckily, the pipe operator will provide us with a more clean (and cleaver) way of achieving the above task.
 
 ### The Pipe Operator
-Luckily, `dplyr` provides a cleaner and effective way of achieving the same task (that is, using the result of one function as a parameter to the next). The **Pipe Operator** (**`>%>`**) indicates that the result from the first function operand should be passed in as **the first argument** to the next function operand!
+Luckily, `dplyr` provides a cleaner and effective way of achieving the same task (that is, using the result of one function as an argument to the next). The **Pipe Operator** (**`>%>`**) indicates that the result from the first function operand should be passed in as **the first argument** to the next function operand!
 
 As a simple example:
 ```r
@@ -295,7 +295,7 @@ The **`group_by()`** operation allows you to break a data frame down into _group
 ```r
 # Get summary statistics by city
 city.summary <- group_by(pollution, city) %>%
-  summarize( # first parameter (the data frame) is recieved from the pipe
+  summarize( # first argument (the data frame) is recieved from the pipe
     mean = mean(amount),
     sum = sum(amount),
     n = n()
@@ -364,14 +364,14 @@ merged.student.info <- left_join(student.contact, student.majors)
                         # 4          4  id4@school.ed      <NA>
 ```
 
-When we perform this **left join**, R goes through each row in thetable on the "left" (the first parameter), looking at the shared column (`student.id`). For each row, it looks for a corresponding value in `student.majors$student.id`, and if it fines one then it adds any data from columns that are in `student.majors` but _not_ in `student.contact` (e.g., `major`) to new columns in the resulting table, with values from whatever the matching row was. Thus student \#1 was given a `major` of "sociology", student \#2 was given a `major` of "math", and student \#4 was given a `major` of `NA` (because that student had no corresponding row in `student.majors`!)
+When we perform this **left join**, R goes through each row in thetable on the "left" (the first argument), looking at the shared column (`student.id`). For each row, it looks for a corresponding value in `student.majors$student.id`, and if it fines one then it adds any data from columns that are in `student.majors` but _not_ in `student.contact` (e.g., `major`) to new columns in the resulting table, with values from whatever the matching row was. Thus student \#1 was given a `major` of "sociology", student \#2 was given a `major` of "math", and student \#4 was given a `major` of `NA` (because that student had no corresponding row in `student.majors`!)
 
 - In short, a **left join** returns all of the rows from the first table, along with all of the columns from both tables.
 
 R will join tables by any and all shared columns. However, if the names of your columns don't match specifically, you can also specify a `by` argument indicating which columns should be used for the matching:
 
 ```r
-# Use the named `by` parameter to specify (a vector of) columns to match on
+# Use the named `by` argument to specify (a vector of) columns to match on
 left_join(student.contact, student.majors, by="student.id")  # column name IS a string here!
 ```
 

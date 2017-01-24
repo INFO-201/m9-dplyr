@@ -5,18 +5,11 @@
 install.packages("dplyr")
 library("dplyr")
 
-# Exercise 1: Data Frame Practice
-
-# Install devtools package: allows installations from GitHub
-install.packages('devtools')
-
-# Install "fueleconomy" package from GitHub
-devtools::install_github("hadley/fueleconomy")
-
 # Require/library the fueleconomy package
 library(fueleconomy)
 
-# You should now have access to the `vehicles` data.frame
+# You should have have access to the `vehicles` data.frame
+# Use `as.data.frame()` to make it into a normal data frame
 
 
 # Select the different manufacturers (makes) of the cars in this data set.

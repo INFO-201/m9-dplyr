@@ -11,6 +11,8 @@ library(fueleconomy)
 
 # You should now have access to the `vehicles` data.frame
 
+# Use `as.data.frame()` to make it into a normal data frame
+
 
 # Select the different manufacturers (makes) of the cars in this data set.
 
