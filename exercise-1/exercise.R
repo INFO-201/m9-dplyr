@@ -10,7 +10,9 @@ devtools::install_github("hadley/fueleconomy")
 library(fueleconomy)
 
 # You should now have access to the `vehicles` data.frame
+# Use `as.data.frame()` to make it into a normal data frame
 View(vehicles)
+vehicles <- as.data.frame(vehicles)
 
 # Select the different manufacturers (makes) of the cars in this data set.
 makes <- vehicles$make
