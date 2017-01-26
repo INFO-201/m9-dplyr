@@ -295,7 +295,7 @@ The **`group_by()`** operation allows you to break a data frame down into _group
 ```r
 # Get summary statistics by city
 city.summary <- group_by(pollution, city) %>%
-  summarize( # first argument (the data frame) is recieved from the pipe
+  summarize( # first argument (the data frame) is received from the pipe
     mean = mean(amount),
     sum = sum(amount),
     n = n()
