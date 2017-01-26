@@ -1,7 +1,6 @@
-# Module 9: Introduction to the DPLYR Package
+# Module 10: Introduction to DPLYR
 
-## Overview
-The DPLYR package is the preeminent tool for data wrangling in R (and perhaps, in data science more generally). It provides users with an intuitive vocabulary for executing data management and analysis tasks. Learning this package will undoubtedly make your data preparation and management process faster and easier to understand.
+The **`dplyr`** ("dee-ply-er") package is the preeminent tool for data wrangling in R (and perhaps, in data science more generally). It provides users with an intuitive vocabulary for executing data management and analysis tasks. Learning and utilizing this package will make your data preparation and management process faster and easier to understand.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -9,345 +8,432 @@ The DPLYR package is the preeminent tool for data wrangling in R (and perhaps, i
 
 - [Resources](#resources)
 - [A Grammar of Data Manipulation](#a-grammar-of-data-manipulation)
-- [Data Frame Manipulation](#data-frame-manipulation)
+- [Using `dplyr` Functions](#using-dplyr-functions)
   - [Select](#select)
   - [Filter](#filter)
   - [Mutate](#mutate)
   - [Arrange](#arrange)
-  - [Summarise](#summarise)
-  - [Distinct](#distinct)
-- [Pipe Operator](#pipe-operator)
-  - [Nested Operations](#nested-operations)
-  - [Pipe Operator Syntax](#pipe-operator-syntax)
+  - [Summarize](#summarize)
+- [Multiple Operations](#multiple-operations)
+  - [The Pipe Operator](#the-pipe-operator)
 - [Grouped Operations](#grouped-operations)
 - [Joins](#joins)
-  - [DPLYR Joins,](#dplyr-joins)
-- [Non-standard Evaluation](#non-standard-evaluation)
+- [Non-Standard Evaluation vs. Standard Evaluation](#non-standard-evaluation-vs-standard-evaluation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Resources
-- [Introduction to DPLYR - RStudio](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html)
-- [STRATA NYC Materials Download - RStudio](bit.ly/rday-nyc-strata15)
-- [Non-standard Evaluation in DPLYR - RStudio](https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html)
-- [Data Manipulation with DPLYR - R-bloggers](https://www.r-bloggers.com/data-manipulation-with-dplyr/)
-- [Data Manipulation in R - DataCamp](https://www.datacamp.com/courses/dplyr-data-manipulation-r-tutorial)
-- [DPLYR Join Cheatsheet - Jenny Bryan](http://stat545.com/bit001_dplyr-cheatsheet.html)
-- [Two-Table Verbs - CRAN](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html)
+- [Introduction to dplyr](https://cran.r-project.org/web/packages/dplyr/vignettes/introduction.html)
+- [dplyr and pipes: the basics (blog)](http://seananderson.ca/2014/09/13/dplyr-intro.html)
+- [Two-table verbs](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html)
+- [DPLYR Join Cheatsheet (Jenny Bryan)](http://stat545.com/bit001_dplyr-cheatsheet.html)
+- [Non-standard evaluation](https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html)
+- [Data Manipulation with DPLYR (R-bloggers)](https://www.r-bloggers.com/data-manipulation-with-dplyr/)
+- [Data Manipulation in R (DataCamp)](https://www.datacamp.com/courses/dplyr-data-manipulation-r-tutorial)
 
 ## A Grammar of Data Manipulation
-[Hadley Wickham](http://hadley.nz/), the creator of the dplyr package, fittingly refers to it as a _Grammar of Data Manipulation_. The package provides a set of verbs to execute common data preparation tasks. One of the core challenge in programming is mapping from questions about a dataset to specific programming operations. The presence of a data manipulation grammar makes this process smoother, as it enables us to use the same vocabulary to both ask questions and execute our program. More specifically, it allows us to:
+[Hadley Wickham](http://hadley.nz/), the creator of the [`dplyr`](https://github.com/hadley/dplyr) package, fittingly refers to it as a ___Grammar of Data Manipulation___.
 
-- `select` specific columns of interest
-- `filter` down the rows
-- `mutate` a dataset to add more columns
-- `arrange` your rows in a particular order
-- `summarise` columns of interest
-- `distinct` - select the `distinct` set of rows
-- `join` multiple `data.frame` elements together
+This is because the package provides a set of **verbs** (functions) to that describe and perform common data preparation tasks. One of the core challenge in programming is _mapping_ from questions about a dataset to specific programming operations. The presence of a data manipulation grammar makes this process smoother, as it enables us to use the same vocabulary to both _ask_ questions and _write_ our program. Specifically, the `dplyr` grammar lets us to easily talk about and perform task such as:
 
-As you know, it's possible to implement any of these procedures with base R code -- this library just makes it easier to read and write. In the next section, we'll learn how to implement these functions to ask questions of our datasets.
+- **select** specific features (columns) of interest from the data set
+- **filter** out irrelevant data and only keep observations (rows) of interest
+- **mutate** a data set by adding more features (columns)
+- **arrange** the observations (rows) in a particular order
+- **summarize** the data in terms of aspects such as the mean, median, or maximum
+- find **distinct** observations (rows) in the data set
+- **join** multiple data sets together into a single data frame
 
-To practice asking questions about datasets _without_ `dplyr`, see [exercise-1](exercise-1).
+You can use these words when describing the _algorithm_ or process for interrogating data, and then use `dplyr` to write code that will closely follow your "plain language" description because it uses functions and procedures that share the same language. Indeed, many real-world questions about a dataset come down to isolating specific rows/columns of the data set as the "elements of interest", and then performing a simple comparison or computation (mean, count, max, etc.). While it is possible to perform this computation with base R code&mdash;the `dplyr` library makes it much easier to write and read such code.
 
-## Data Frame Manipulation
-Many real-world questions about a dataset boil down to isolating specific rows/columns of the data and performing a simple comparison or computation (mean, median, etc.). Making yourself comfortable with the following operations will allow you to quickly write code to ask questions of your dataset.
+<!-- Refactor this into Module 9 probably -->
+To practice asking questions about datasets using these questions but ___without___ `dplyr`, see [exercise-1](exercise-1).
 
-For each of the following `dplyr` functions, the first argument to the function is a data frame, followed by various other arguments. Note, inside of the `dplyr` function parenthases, you should reference data frame columns **without quotation marks** (see examples below). This design choice makes the code easier to write and read, though occasionally can create challenges. To learn more, see the section below on [Non-standard Evaluation](#Non-standard Evaluation).
+## Using `dplyr` Functions
+The `dplyr` package provides functions that mirror the above verbs. Using this package's functions will allow you to quickly and effectively write code to ask questions of your data set.
 
+Since `dplyr` is an external package, you will need to install it (once per machine) and load it to make the functions available:
 
-The images in this section come from the [RStudio STRATA NYC Materials](bit.ly/rday-nyc-strata15), which was presented by [Nathan Stephens](http://conferences.oreilly.com/strata/big-data-conference-ny-2015/public/schedule/speaker/217840). Exercises 4, 5, and 6 inspired by the RStudio [documentation](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html).
+```r
+install.packages("dplyr")  # once per machine
+library("dplyr")
+```
+
+After loading the library, you can call any of the functions just as if they were the built-in functions you've come to know and love.
+
+For each `dplyr` function discussed here, the **first argument** to the function is a data frame to manipulate, with the rest of the arguments providing more details about the manipulation.
+
+- ___IMPORTANT NOTE:___ inside the function argument list (inside the parentheses), we refer to data frame columns **without quotation marks**&mdash;that is, we just give the column names as _variable names_, rather than as _character strings_. This is refered to as [non-standard evaluation](#Non-standard Evaluation), and is described in more detail below; while it makes code easier to write and read, it can occassionally create challenges.
+
+<small>The images in this section come from the [RStudio's STRATA NYC R-Day workshop](http://bit.ly/rday-nyc-strata15), which was presented by [Nathan Stephens](http://conferences.oreilly.com/strata/big-data-conference-ny-2015/public/schedule/speaker/217840).</small>
 
 ### Select
-The `select` operation allows you to choose the **columns** of interest out of your data frame.
+The **`select()`** operation allows you to choose and extract **columns** of interest from your data frame.
 
-![screenshot of the select function](imgs/select-ss.png)
-
-To execute the `select` function, simply pass in the data frame, and the names of the columns you wish to `select`:
+![Diagram of select function](img/select.png)
 
 ```r
 # Select `storm` and `pressure` columns from `storms` data frame
-storms <- select(storms, storm, pressure)
+storm.info <- select(storms, storm, pressure)
 ```
+
+The `select()` function takes in the data frame to select from, followed by the names of the columns you wish to select (without quotation marks!)
+
+This function is equivalent to simply extracting the columns:
+
+```r
+# extract columns by name
+storm.info <- storms[, c("storm", "pressure")]  # Note the comma!
+```
+
+But easier to read and write!
 
 ### Filter
-Whereas `select` allows you to focus in on **columns** of interest, the `filter` function allows you to hone in on **rows** of interest. For example:
+The **`filter()`** operation allows you to choose and extract **rows** of interest from your data frame (contrasted with `select()` which extracts _columns_).
 
-![screenshot of the filter function](imgs/filter-ss.png)
-
-```r
-# Select storms whose `storm` column is in the vector ['Ana', 'Alberto']
-some.storms <- filter(storms, storm %in% c('Ana', 'Alberto')
-```
-
-After passing in a data frame as the first argument of the function, you may specify a series of comma-separated **conditions**:
+![Diagram of filter function](img/filter.png)
 
 ```r
-# Generic form of the `filter` function
-filtered.rows <- filter(DATAFRAME, CONDITION-1, CONDITION-2, ..., CONDITION-N)
+# Select rows whose `wind` column is greater than or equal to 50
+some.storms <- filter(storms, wind >= 50)
 ```
- R will return all rows that match **all** condition. This is similar to saying that you want to `filter` down a dataframe to only the rows that meet condition-1 **and** condition-2.
+
+The `filter()` function takes in the data frame to filter, followed by a comma-separated list of conditions that each _row_ returned row must fill. Note again that columns are provided without quotation marks!
+-  R will extract the rows that match **all** conditions. Thus you are specifying that you want to filter down a data frame to contain only the rows that meet Condition 1 **and** Condition 2.
+
+This function is equivalent to simply extracting the rows:
+
+```r
+# extract rows by condition
+some.storms <- storms[storms$wind >= 50, ]  # Note the comma!
+```
 
 ### Mutate
-The `mutate` function allows you to create additional **columns** for your data frame:
+The **`mutate()`** operation allows you to create additional **columns** for your data frame.
 
-![screenshot of the mutate function](imgs/mutate-ss.png)
+![Diagram of mutate function](img/mutate.png)
 
 ```r
-# Add ratio and inverse ratio columns
-storms <- mutate(storms, ratio = pressure/wind, inverse = 1/ratio
+# Add `ratio` column that is ratio between pressure and wind
+storms <- mutate(storms, ratio = pressure/wind)  # Replace existing frame with mutated one!
 ```
 
-As always, the first **argument** to the function is that data frame with which you are working. Each additional argument is a statement that creates a new **column** using the following syntax:
+The `mutate()` function takes in the data frame to mutate, followed by a comma-separated list of columns to create using the same **`name = vector`** syntax we used when creating **lists** or **data frames** from scratch. As always, the names of the columns in the data frame are used without quotation marks.
+- Despite the `mutate()` function doesn't actually change the data frame; instead it returns a _new_ data frame that has the extra columns added. You will often want to replace the old data frame variable with this new value.
+
+In cases where you are creating multiple columns (and therefore writing really long lines of code), you should break the single statement into multiple lines for readability. Because you haven't closed the parentheses on the function arguments, R will not treat each line as a separate statement.
 
 ```r
-# Generic form of the `mutate` function
-more.columns <- mutate(DATAFRAME, new.column1 = old.column * 2, new.column2 = old.column * 3 )
-```
-
-In cases where you creating multiple variables (and therefore writing really long lines of code), you should break the single statement into multiple lines.
-
-```r
-# Generic form of the `mutate` function
-more.columns <- mutate(DATAFRAME,
-                       new.column1 = old.column * 2,
-                       new.column2 = old.column * 3,
-                       new.column3 = old.column * 4
+# Generic mutate command
+more.columns <- mutate(my.data.frame,
+                       new.column.1 = old.column * 2,
+                       new.column.2 = old.column * 3,
+                       new.column.3 = old.column * 4
                       )
 ```
 
-
 ### Arrange
-The `arrange` function is what you may think of as **sorting rows**.
+The **`arrange()`** operation allows you to **sort the rows** of your data frame by some feature (column value).
 
-![screenshot of the arrange function](imgs/arrange-ss.png)
-
-```r
-# Arrange storms by increasing order of the `wind` column
-storms <- arrange(storms, wind)
-```
-
-To sort by the **reverse** order of a column, simply place a minus sign (`-`) preceeding the varaible name. As you might imagine, you can pass multiple arguments into the `arrange` function to sort first by `argument-1`, then by `argument-2`.
-
-### Summarise
-The `summarise` function (`summarize` is also accepted) creates a summary of a **column**, computing a single value from multipe values. The `summarise` function is particularly useful for grouped operations (see below), however can be used in non-grouped operations as well, for example:
-
-![screenshot of the summarise function](imgs/summarise-ss.png)
+![Diagram of arrange function](img/arrange.png)
 
 ```r
-# Compute the median value of the `amount` column
-summary <- summarise(pollution, median = median(amount))
+# Arrange storms by INCREASING order of the `wind` column
+sorted.storms <- arrange(storms, wind)
 ```
 
-Each argument following the name of your data frame is a new value that will be computed using your columns. As you likely guessed, you can computed multiple summaries in the same statement:
+By default, the `arrange()` function will sort rows in **increasing** order. To sort in **reverse** (decreasing) order, place a minus sign (**`-`**) in front of the column name (e.g., `-wind`). You can also use the `desc()` helper function (e.g, `desc(wind)`).
+- You can pass multiple arguments into the `arrange()` function in order to sort first by `argument.1`, then by `argument.2`, and so on.
+- Again, this doesn't actually modify the argument data frame&mdash;instead returning a new data frame you'll need to store.
 
-```r
-# Compute the median value of the `amount` column
-summaries <- summarise(pollution,
-                       median = median(amount),
-                       mean = mean(amount),
-                       sum = sum(amount),
-                       count = n() # nifty trick for number of observations
-                       )
-```
+<!-- ### Distinct
+The **`distinct()`** operation allows you to extract distinct values (rows) from a particular **column** in your data frame&mdash;that is, you'll get one row for each different value in the column. If multiple columns are specified, you will get a row for each different combination.
 
-### Distinct
-The `distinct` function allows you to extract only the distinct **rows** in a table, evaluated based on the **columns** provided as arguments to the function. For example:
+For example (no diagram available):
 
 ```r
 # Create a quick data frame
-x <- c(1, 1, 2, 2, 3, 3, 4, 4)
-y <- 1:8
+x <- c(1, 1, 2, 2, 3, 3, 4, 4)  # duplicate x values
+y <- 1:8                        # unique y values
 my.df <- data.frame(x, y)
 
 # Select distinct rows, judging by the `x` column
 distinct.rows <- distinct(my.df, x)
+                                    #   x
+                                    # 1 1
+                                    # 2 2
+                                    # 3 3
+                                    # 4 4
 
 # Select distinct rows, judging by the `x` and `y`columns
-distinct.rows <- distinct(my.df, x, y)
+distinct.rows <- distinct(my.df, x, y)  # returns whole table, since no duplicate rows
 ```
 
-While this is a simple way to get a unique set of rows, **be careful** not to unintentionally remove rows of your data which may be important.
+While this is a simple way to get a unique set of rows, **be careful** not to unintentionally remove rows of your data which may be important. -->
+
+### Summarize
+The **`summarize()`** function (equivalently `summarise` for those using the British spelling) will generate a new data frame that contains a "summary" of a **column**, computing a single value from the multiple elements in that column.
+
+![Diagram of summarize function](img/summarize.png)
+
+```r
+# Compute the median value of the `amount` column
+summary <- summarize(pollution, median = median(amount))
+```
+
+The `summarize()` function takes in the data frame to mutate, followed by the values that will be included in the resulting summary table. You can use multiple arguments to include multiple summaries in the same statement:
+
+```r
+# Compute statistics for the `amount` column
+summaries <- summarize(pollution,
+                       median = median(amount),  # median value
+                       mean = mean(amount),      # "average" value
+                       sum = sum(amount),        # total value
+                       count = n()               # number of values (neat trick!)
+                       )
+```
+
+Note that the `summarize()` function is particularly useful for grouped operations (see below), as you can produce summaries of different groups of data.
 
 To practice asking questions about datasets _with_ `dplyr`, see [exercise-2](exercise-2). For a more involved example, see [exercise-4](exercise-4).
 
-## Pipe Operator
-You've likely encountered a number of instances in which you want to take the results from one function and pass them into another function. Our approach thus far has often been to create temporary variables for use in our analysis. For example, if you're using the `mtcars` dataset, you may want to ask a simple question like,
+
+## Multiple Operations
+<!-- This discussion may be better for lecture than module, but leave in for now -->
+You've likely encountered a number of instances in which you want to take the results from one function and pass them into another function. Our approach thus far has often been to create _temporary variables_ for use in our analysis. For example, if you're using the `mtcars` dataset, you may want to ask a simple question like,
 
 > Which 4-cylinder car gets the best milage per gallon?
 
 This simple question actually requires a few steps:
 
-1. `Filter` down the dataset to only 4 cylinder cars
-2. Of the 4 cylinder cars, `filter` down to the one with the highest mpg
-3. `Select` the car name of the car from step 2.
+1. _Filter_ down the dataset to only 4 cylinder cars
+2. Of the 4 cylinder cars, _filter_ down to the one with the highest mpg
+3. _Select_ the car name of the car
 
 You could then implement each step as follows:
 
 ```r
-# Add a column that is the car name
+# Preparation: add a column that is the car name
 mtcars.named <- mutate(mtcars, car.name = row.names(mtcars))
 
-# Filter down to only four cylinder cars
+# 1. Filter down to only four cylinder cars
 four.cyl <- filter(mtcars.named, cyl == 4)
 
-# Get the best four cylinder car
+# 2. Filter down to the one with the highest mpg
 best.four.cyl <- filter(four.cyl, mpg == max(mpg))
 
-# Get the name of the car
+# 3. Select the car name of the car
 best.car.name <- select(best.four.cyl, car.name)
-
 ```
 
-While this works, it takes more lines of code than it should, and clutters our work environment with variables we won't need to use again.
+While this works fine, it clutters our work environment with variables we won't need to use again, and which can potentially step on one anothers toes. It can help with readability (the results of each step is complete), but those extra variables make it harder to modify and change the algorithm later.
 
-### Nested Operations
-An alternative to writing multiple lines of code is to write the desired statements **nested** within other statements. For example, we could write the statement above as follows:
+An alternative to saving each step as a distinct variable would be to write the desired statements **nested** within other statements. For example, we could write the statement above as follows:
 
 ```r
-# Add a column that is the car name
+# Preparation: add a column that is the car name
 mtcars.named <- mutate(mtcars, car.name = row.names(mtcars))
 
 # Write a nested operation to return the best car name
-
-# Select name from the filtered data
-best.car.name <- select(
-                  # Filter the 4 cylinder data down by MPG
-                  filter(
-                    # Filter down to 4 cylinders
-                    filter(
-                      mtcars.named,
+best.car.name <- select(  # 3. Select car name of the car
+                  filter(  # 2. Filter down to the one with the highest mpg
+                    filter( # 1. Filter down to only four cylinder cars
+                      mtcars.named,  # arguments for the Step 1 filter
                       cyl == 4
                     ),
-                    mpg == max(mpg)
-                  ), car.name
+                    mpg == max(mpg)  # other arguments for the Step 2 filter
+                  ),
+                  car.name  # other arguments for the Step 3 select
                 )
 ```
 
-The above statement executes without creating undesirable temporary variables, but even with only 3 steps it gets quite complicated to read (think about it from the inside out for clarity). This will obviously become undecipherable for more involved operations. Luckily, the pipe operator will provide us with a more clean (and cleaver) way of achieving the above task.
+This version uses **anonymous variables**&mdash;result values which we don't give names to (so are anonymous), but instead immediately use as the arguments to another function. We've used these frequently with the `print()` function and with filters (those vectors of `TRUE` and `FALSE` values), and even the `max(mpg)` in Step 2 above is an anonymous variable!
 
-### Pipe Operator Syntax
-The pipe operator provides us with a syntax for taking the _results from one function_ and passing them in as the _first argument to a second function_. This avoids creating unneeded variables without the density of a nested statement. Unfortunately, the pipe operator syntax (`%>%`) takes getting used to. To save time, use the [RStudio keyboard shortcut](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts) (`cmd + shift + m`)
+This _nested_ version performs the same results as the _temporary variable_ version without creating the extra variables, but even with only 3 steps it can get quite complicated to read&mdash;in a large part because you have to think about it "inside out", with the stuff in the middle evaluating first.
+
+This will obviously become undecipherable for more involved operations. Luckily, the pipe operator will provide us with a more clean (and cleaver) way of achieving the above task.
+
+### The Pipe Operator
+Luckily, `dplyr` provides a cleaner and effective way of achieving the same task (that is, using the result of one function as an argument to the next). The **Pipe Operator** (**`>%>`**) indicates that the result from the first function operand should be passed in as **the first argument** to the next function operand!
+
+As a simple example:
+```r
+# nested version: evaluate c(), then max(), then print()
+print( max( c(2, 0, 1) ) )
+
+# pipe version
+c(1,2,3) %>%   # do first function
+  max() %>%   # which becomes the _first_ argument to the next function
+  print()  # which becomes the _first_ argument to the next function
+```
+
+Or as another version of the above data wrangling:
 
 ```r
-# Add a column that is the car name
+# Preparation: add a column that is the car name
 mtcars.named <- mutate(mtcars, car.name = row.names(mtcars))
 
-# Begin your piped operation: filter down to only four cylinder cars
-best.car.name <- filter(mtcars.named, cyl == 4) %>%
-            filter(mpg == max(mpg)) %>%
-            select(car.name)
+best.car.name <- filter(mtcars.named, cyl == 4) %>%  # Step 1
+  filter(mpg == max(mpg)) %>%  # Step 2
+  select(car.name)
 ```
-Note, the pipe operator, which is part of the `dplyr` package, works with **any function** - not just `dplyr` functions. While the syntax is odd, this will completely change (simplify) the way you write code to ask questions about your data.
 
-For an introduction to working with the pipe operator, see [exercise-3](exercise-3).
+- Yes, the `%>%` operator is awkward to type and takes some getting use to (especially compared to the command-line's use of `|` to pipe). However, you can ease typing either by noticing that you hold down the `shift` key for all 3 characters, or by using the [RStudio keyboard shortcut](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts) `cmd + shift + m`.
+
+The pipe operator is part of the `dplyr` package (it is only available if you load that package), but it will work with _any_ function, not just `dplyr` ones! This syntax, while slightly odd, can complete change and simply the way you write code to ask questions about your data!
+
+For an introduction to and practice working with the pipe operator, see [exercise-3](exercise-3).
+
 
 ## Grouped Operations
-The power of the `summarise` function is much clearer when we begin to **group operations by rows**. In the above example, we were only able to create a single summary measure for any given column, which didn't provide much additional information. However, computing the same summary measure (`mean`, `median`, `sum`, etc.) by _groups of rows_ allow you to ask more nuanced questions about your dataset. For example, if you were using the `mtcars` dataset, you may want to answer this question:
+`dplyr` functions are powerful, but they are truly awesome when you can apply them to **groups of rows** within a data set. For example, the above use of `summarize()` isn't particularly useful since it just gives a single summary for a given column (which we could have done anyway). However, a **grouped** operation would allow us to compute the same summary measure (`mean`, `median`, `sum`, etc.) automatically for multiple groups of rows, enabling us to ask more nuanced questions about our data set.
 
->What is the difference in mean miles per gallon for cars with different numbers of gears (3, 4, or 5)?
+The **`group_by()`** operation allows you to break a data frame down into _groups_ of rows, which can then have the other verbs (e.g., `summarize`, `filter`, etc). applied to each one.
 
-This simple question requires the computation of the mean for different subsets of the data. Rather than explicitly break your data into different chunks and run the same computations, you can use the `group_by` function to accomplish this in a single command:
+![Diagram of the group_by function](img/group_by.png)
+
+```r
+# Get summary statistics by city
+city.summary <- group_by(pollution, city) %>%
+  summarize( # first argument (the data frame) is received from the pipe
+    mean = mean(amount),
+    sum = sum(amount),
+    n = n()
+  )
+```
+
+As another example, if you were using the `mtcars` dataset, you may want to answer this question:
+
+> What are the differences in mean miles per gallon for cars with different numbers of gears (3, 4, or 5)?
+
+This simple question requires computing the mean for different subsets of the data. Rather than explicitly breaking your data into different groups (a.k.a bins or chunks) and running the same operations on each, you can use the `group_by()` function to accomplish this in a single command:
 
 ```r
 # Group cars by gear number, then compute the mean and median mpg
-summary.table <- group_by(mtcars, gear) %>%
-                 summarise(mean = mean(mpg), median = median(mpg), count = n())
+gear.summary <- group_by(mtcars, gear) %>%  # group by gear
+                 summarise(mean = mean(mpg))  # calculate mean
+# computing the difference between scores is done elsewhere (or by hand!)
 ```
 
-This quickly and easily allows you to compare different subsets of your data, as diagrammed here:
+Thus grouping can allow you to quickly and easily compare different subsets of your data!
 
-![screenshot of the groupby function](imgs/groupby-ss.png)
+For an introduction to and practice working with grouped operations, see [exercise-5](exercise-5).
 
-```r
-# Group the pollution data.frame by city for comparison
-pollution <- group_by(pollution, city) %>%
-               summarise(mean = mean(amount), sum = sum(amount), n = n()
-            )
-```
-
-For an introduction to working with grouped operations, see [exercise-5](exercise-5).
 
 ## Joins
-A common procedure in the data analysis process is bringing together data from various sources, often referred to as _joining_ or _merging_ datasets. _Joining_ can get quite tricky, and is a core part of understanding how to use relational databases. In this section, we'll introduce the concept and see some simple implementations.
+When working with real-world data, you'll often find that that data is stored across _multiple_ files or data frames. This can be done for a number of reasons. For one, it can help to reduce memory usage (in the same manner as **factors**): for example, if we had a data frame containing information on students enrolled in university courses, we might store information about each course (the professor, meeting time, and classroom) in a separate data frame rather than duplicating that information for every student that takes the same course. We also may simply want to keep our information organized: have student information in one file, and course information in another.
 
-### DPLYR Joins,
-As stated in the [documentation](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html) there are multiple families of joins in `dplyr`:
+- This separation and organization of data is a core concern in the design of [relational databases](https://en.wikipedia.org/wiki/Relational_database); check out the iSchool's Database courses for more information!
 
->**Mutating joins**, which add new variables to one table from matching rows in another.
+But at some point, we'll want to access information from both data sets (e.g., we need to figure out a student's schedule), and thus need a way to combine the data frames. This process is called a **join** (because we are "joining" the data frames together). When we perform a join, we identify **columns** which are present in both tables. Those column values are then used as **identifiers** to determine which rows in each table correspond to one another, and thus will be combined into a row in the resulting joined table.
 
->**Filtering joins**, which filter observations from one table based on whether or not they match an observation in the other table.
+The **`left_join()`** operation is one example of a join. This operation looks for matching columns between the two data frames, and then returns a new data frame that is the first ("left") operand with extra columns from the second operand added on.
 
->**Set operations**, which combine the observations in the data sets as if they were set elements.
+![Diagram of the left_join function](img/left_join.png)
 
-(quoted [directly](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html), emphasis added).
+```r
+# Combine (join) songs and artists data frames
+left_join(songs, artists)
+```
 
-In this section, we'll focus on **mutating joins** which will add additional variables (columns) to a dataset.
-
-First, let's discuss the data structure: imagine you have two data frame objects, whose rows are observations and columns are information about those observations (this is how we've typically structured data in this course). When you _join_ data, you are performing a matching procedure in which you have **identifying columns** present in both tables. Those _identifiers_ are used to align the rows in the first table with the rows in the second table, and then the additonal information (columns from table 2) and added.
-
-Let's take an example where we have a table of student ids and their major. In a separate table, we have the contact information of those students (your institution very well may store this information in separate tables for privacy or organizational reasons).
+To understand how this works, consider a specific example where we have a table of student ids and their contact information. We also have a separate table of student ids and their majors (your institution very well may store this information in separate tables for privacy or organizational reasons).
 
 ```r
 # Table of contact information
 student.contact <- data.frame(
-    student.id=c(1, 2, 3, 4),
-    email=c("id1@school.edu", "id2@school.edu", "id3@school.edu", "id4@school.ed")
+    student.id = c(1, 2, 3, 4),  # id numbers
+    email = c("id1@school.edu", "id2@school.edu", "id3@school.edu", "id4@school.ed")
 )
 
 # Table of information about majors
 student.majors <- data.frame(
-  student.id=c(1, 2, 3),
-  major=c('sociology', 'math', 'biology')
+  student.id = c(1, 2, 3),  # id numbers
+  major = c('sociology', 'math', 'biology')
 )
-
-
 ```
 
-To **join** these tables together, you could perform a `left_join`, which would return all of the rows in the first table, and all of the columns in the first and second table.
+Notice that both tables have a `student.id` column, allowing us to "match" the rows from the `student.contact` table to the `student.majors` table and merge them together:
 
 ```r
 # Join tables by the student.id column
-merged.data <- left_join(student.contact, student.majors)
+merged.student.info <- left_join(student.contact, student.majors)
+                        #    student.id          email     major
+                        # 1          1 id1@school.edu sociology
+                        # 2          2 id2@school.edu      math
+                        # 3          3 id3@school.edu   biology
+                        # 4          4  id4@school.ed      <NA>
 ```
 
-This operation created a `major` column in the `merged.data` variable. Note, the **order matters** in the `left_join` statement. If you switch the order of the tables in a `left_join`, you will not retain observations (rows) in the second table that are not present in the first table.
+When we perform this **left join**, R goes through each row in thetable on the "left" (the first argument), looking at the shared column (`student.id`). For each row, it looks for a corresponding value in `student.majors$student.id`, and if it fines one then it adds any data from columns that are in `student.majors` but _not_ in `student.contact` (e.g., `major`) to new columns in the resulting table, with values from whatever the matching row was. Thus student \#1 was given a `major` of "sociology", student \#2 was given a `major` of "math", and student \#4 was given a `major` of `NA` (because that student had no corresponding row in `student.majors`!)
+
+- In short, a **left join** returns all of the rows from the first table, along with all of the columns from both tables.
+
+R will join tables by any and all shared columns. However, if the names of your columns don't match specifically, you can also specify a `by` argument indicating which columns should be used for the matching:
+
+```r
+# Use the named `by` argument to specify (a vector of) columns to match on
+left_join(student.contact, student.majors, by="student.id")  # column name IS a string here!
+```
+
+Notice that because of how we've described a left join, **the order matters!!**. The resulting table only has rows for elements in the _left_ (first) table; any unmatched elements in the second table are lost. If you switch the order of the operands, we would only have information for students with majors:
 
 ```r
 # Join tables by the student.id column
-merged.data <- left_join(student.majors, student.contact)
+merged.student.info <- left_join(student.majors, student.contact)  # switched order!
+                        #   student.id     major          email
+                        # 1          1 sociology id1@school.edu
+                        # 2          2      math id2@school.edu
+                        # 3          3   biology id3@school.edu
 ```
 
-As described in the [documentation](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html), there are various joins supported by `dplyr`, including:
+We don't have any information for student \#4, because they didn't have a record in the left-hand table!
 
-> `left_join`: All observations in first data frame are returned
+Because of this behavior, `dplyr` (and relational database systems in general) provide a number of different kinds of joins, each of which influences _which_ rows are included in the final table. Note that in any case, _all_ columns from _both_ tables will be included, with rows taking on any values from their matches in the second table.
 
-> `inner_join`: Only observations present in **both** data frames are returned
+- **`left_join`** All rows from the first (left) data frame are returned. That is, we get all the data from the left-hand table, with extra column values added from the right-hand table. Left-hand rows without a match will have `NA` in the right-hand columns.
 
-> `full_join`: All observations in both datasets are returned
+- **`right_join`** All rows from the second (right) data frame are returned. That is, we get all the data from the right-hand table, with extra column values added from the left-hand table. Right-hand rows without a match will have `NA` in the left-hand columns. This is the "opposite" of a `left_join`, and the equivalent of switching the operands.
 
-> `right_join`: Opposite of a `left_join`: only observations in the _second_ data frame are returned
+- **`inner_join`** Only rows in **both** data frames are returned. That is, we get any rows that had matching observations in both tables, with the column values from both tables. There will be no additional `NA` values created by the join. Observations from the left that had no match in the right, or observations in the right that had no match in the left, will not be returned at all.
 
-For an introduction to working with joins, see [exercise-6](exercise-6).
-## Non-standard Evaluation
-One of the features that makes `dplyr` such a clean and attractive way to write code is it's use of **non-standard evaluation**. Inside of each `dplyr` function, we've been using variable names **without quotes** because the package leverages **non-standard evaluation** in it's definition. _Most_ of the time, this is not an issue. However, you'll likely run into a situation in which you want to (or need to) use quoted values inside of your `dplyr` functions.
+- **`full_join`** All rows from **both** data frames are returned. That is, we'll get a row for any observation, whether or not it matched. If it happened to match we'll have values from both tables in that row. Observations without a match will have `NA` in the columns from the other table.
 
-The syntax for doing this is quite easy: simply add an underscore (`_`) after your `dplyr` function, and then quote your argument values:
+The key to deciding between these is to think about what set of data you want as your set of observations, and which columns you'd be okay with being `NA` if a record is missing.
+
+Note that these are all _mutating joins_, which add columns from one table to another. `dplyr` also provides _filtering joins_ which exclude rows based on whether they have a matching observation in another table, and _set operations_ which combine observations as if they were set elements. See [the documentation](https://cran.r-project.org/web/packages/dplyr/vignettes/two-table.html) for more detail on these options, but in this class we'll be primarily focusing on the mutating joins described above.
+
+For an introduction to and practice working with joins, see [exercise-6](exercise-6).
+
+
+## Non-Standard Evaluation vs. Standard Evaluation
+One of the features that makes `dplyr` such a clean and attractive way to write code is that inside of each function, we've been able to write column variable names **without quotes**. This is called [**non-standard evaluation**](https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html) (it is _not_ the _standard_ way that code is _evaluated_, or interpreted), and is useful primarily because of how it reduces typing (along with some other benefits when working with databases).
+
+However, there are times when you want to use `dplyr` with **standard evaluation**: that is, you want to be able to specify column names as normal _values_ (in quotes). Luckily, `dplyr` supplies a set of functions that support standard evaluation. These have the exact same names as the normal verb functions, except are followed by an underscore (**`_`**):
 
 ```r
-# Use non-standard evaluation to execute function:
-mpg <- select_(mtcars, 'mpg')
+# Normal, non-standard evaluation version
+mpg <- select(mtcars, mpg)
 
-# Pass in a quoted equation
-mean.mpg <- summarise_(mtcars, 'mean(mpg)')
+# Standard-evaluation version (same result)
+mpg <- select_(mtcars, 'mpg')  # with quotes! 'mpg' is a normal value!
+
+# Normal, non-standard evaluation version of equations
+mean.mpg <- summarize(mtcars, mean(mpg))
+
+# Standard-evaluation version of equations (same result)
+mean.mpg <- summarize_(mtcars, 'mean(mpg)')
 ```
 
-A fairly common use-case for this is if you're storing the _name_ of a variable of interest in a variable:
+- Yes, it does feel a bit off that the "normal" way of using `dplyr` is the "non-standard" way.
+
+The most common use-case for this system is when you're storing the _name of a column of interest_ in a variable:
 
 ```r
-# Which variable you're interested in
-var.of.interest <- 'mpg'
+# Which column you're interested in
+which.column <- 'mpg'
 
-# Use non-standard evaluation to execute function:
-mpg <- select_(mtcars, var.of.interest)
+# Use standard evaluation to execute function:
+my.column <- select_(mtcars, which.column)
 ```
+
+Because we're using standard evaluation, `which.column` isn't treated as the _name_ of the column (it's _not_ refering to `mtcars$which.column`, a.k.a. `mtcars[['which.column']]`), but is instead a normal variable which contains the name of the column in it (it _is_ referring to `mtcars[[which.column]]`)
